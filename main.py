@@ -1,6 +1,9 @@
 from env import Environment
-#from agent import Agents
+import pygame
 from greedyagent import GreedyAgents as Agents
+from visual import draw_env_pygame
+import sys
+
 
 import numpy as np
 
@@ -20,6 +23,9 @@ if __name__=="__main__":
     env = Environment(map_file=args.map, max_time_steps=args.max_time_steps,
                       n_robots=args.num_agents, n_packages=args.n_packages,
                       seed = args.seed)
+    pygame.init()
+    cell_size = 40
+    screen = pygame.display.set_mode((env.n_rows * cell_size, env.n_rows * cell_size))
     
     state = env.reset()
     agents = Agents()
@@ -29,12 +35,24 @@ if __name__=="__main__":
     done = False
     t = 0
     while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
         actions = agents.get_actions(state)
         next_state, reward, done, infos = env.step(actions)
         state = next_state
-        env.render()
+        print(state)
+        draw_env_pygame(screen, env, cell_size)
+        pygame.time.wait(200)  # 200ms giữa mỗi bước
+        print(infos)
+
         t += 1
 
+
     print("Episode finished")
-    print("Total reward:", infos['total_reward'])
+    print("Tota l reward:", infos['total_reward'])
     print("Total time steps:", infos['total_time_steps'])
+# state tra thong tin ve timestep , map, vit ri agent, vi tri pakage
+# toi muon tung timestep se tra ve vi tri cua package va khi agent giao xong thi moi xoa di

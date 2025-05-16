@@ -24,7 +24,7 @@ class Environment:
         self.grid = self.load_map()
         self.n_rows = len(self.grid)
         self.n_cols = len(self.grid[0]) if self.grid else 0 
-        self.move_cost = move_cost 
+        self.move_cost = move_cost
         self.delivery_reward = delivery_reward 
         self.delay_reward = delay_reward
         self.t = 0 
@@ -126,25 +126,43 @@ class Environment:
     def get_state(self):
         """
         Returns the current state of the environment.
-        The state includes the positions of robots and packages.
-        :return: State representation.
+        The state includes all current (old and new) packages and robot states.
+        New packages (starting at current time) will be set to 'waiting'.
         """
-        selected_packages = []
-        for i in range(len(self.packages)):
-            if self.packages[i].start_time == self.t:
-                selected_packages.append(self.packages[i])
-                self.packages[i].status = 'waiting'
+        # Cập nhật trạng thái cho các package mới xuất hiện ở thời điểm t
+        for pkg in self.packages:
+            if pkg.start_time == self.t and pkg.status != 'delivered':
+                pkg.status = 'waiting'
+
+        # Chọn tất cả package chưa được giao
+        active_packages = [
+            pkg for pkg in self.packages if pkg.status != 'delivered' and self.t >= pkg.start_time
+        ]
 
         state = {
             'time_step': self.t,
             'map': self.grid,
-            'robots': [(robot.position[0] + 1, robot.position[1] + 1,
-                        robot.carrying) for robot in self.robots],
-            'packages': [(package.package_id, package.start[0] + 1, package.start[1] + 1, 
-                          package.target[0] + 1, package.target[1] + 1, package.start_time, package.deadline) for package in selected_packages]
+            'robots': [
+                (robot.position[0] + 1, robot.position[1] + 1, robot.carrying)
+                for robot in self.robots
+            ],
+            'packages': [
+                (
+                    pkg.package_id,
+                    pkg.start[0] + 1,
+                    pkg.start[1] + 1,
+                    pkg.target[0] + 1,
+                    pkg.target[1] + 1,
+                    pkg.start_time,
+                    pkg.deadline
+                )
+                for pkg in active_packages
+            ]
         }
         return state
-        
+
+
+
 
     def get_random_free_cell_p(self):
         """
@@ -362,6 +380,7 @@ if __name__=="__main__":
     state = env.reset()
     print("Initial State:", state)
     print("Initial State:")
+    # print(state["packages"])
     env.render()
 
     # Agents
