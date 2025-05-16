@@ -128,13 +128,14 @@ class Environment:
         Returns the current state of the environment.
         The state includes all current (old and new) packages and robot states.
         New packages (starting at current time) will be set to 'waiting'.
+        Package position is updated to robot's position if package is in transit.
         """
-        # Cập nhật trạng thái cho các package mới xuất hiện ở thời điểm t
+        # Cập nhật trạng thái gói mới xuất hiện ở thời điểm hiện tại
         for pkg in self.packages:
             if pkg.start_time == self.t and pkg.status != 'delivered':
                 pkg.status = 'waiting'
 
-        # Chọn tất cả package chưa được giao
+        # Lấy tất cả gói chưa giao và đã bắt đầu
         active_packages = [
             pkg for pkg in self.packages if pkg.status != 'delivered' and self.t >= pkg.start_time
         ]
@@ -146,20 +147,34 @@ class Environment:
                 (robot.position[0] + 1, robot.position[1] + 1, robot.carrying)
                 for robot in self.robots
             ],
-            'packages': [
-                (
-                    pkg.package_id,
-                    pkg.start[0] + 1,
-                    pkg.start[1] + 1,
-                    pkg.target[0] + 1,
-                    pkg.target[1] + 1,
-                    pkg.start_time,
-                    pkg.deadline
-                )
-                for pkg in active_packages
-            ]
+            'packages': []
         }
+
+        for pkg in active_packages:
+            if pkg.status == 'in_transit':
+                # Lấy vị trí robot đang mang gói
+                carrier = next((robot for robot in self.robots if robot.carrying == pkg.package_id), None)
+                if carrier:
+                    pos = carrier.position
+                else:
+                    pos = pkg.start
+            else:
+                pos = pkg.start
+
+            state['packages'].append((
+                pkg.package_id,
+                pos[0] + 1,
+                pos[1] + 1,
+                pkg.target[0] + 1,
+                pkg.target[1] + 1,
+                pkg.start_time,
+                pkg.deadline
+            ))
+
         return state
+
+
+
 
 
 
