@@ -3,6 +3,7 @@ import pygame
 from greedyagent import GreedyAgents as Agents
 from visual import draw_env_pygame
 import sys
+# from A_star import AStarAgents
 
 
 import numpy as np
@@ -29,6 +30,7 @@ if __name__=="__main__":
     
     state = env.reset()
     agents = Agents()
+    # agents = AStarAgents()
     agents.init_agents(state)
     print(state)
     #env.render()

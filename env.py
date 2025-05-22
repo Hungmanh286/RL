@@ -173,12 +173,6 @@ class Environment:
 
         return state
 
-
-
-
-
-
-
     def get_random_free_cell_p(self):
         """
         Returns a random free cell in the grid.
@@ -398,11 +392,9 @@ if __name__=="__main__":
     # print(state["packages"])
     env.render()
 
-    # Agents
-    # Initialize agents
     from greedyagent import GreedyAgents as Agents
-    agents = Agents()   # You should define a default parameters here
-    agents.init_agents(state) # You have a change to init states which can be used or not. Depend on your choice
+    agents = Agents()   
+    agents.init_agents(state) 
     print("Agents initialized.")
     
     # Example actions for robots
@@ -422,7 +414,6 @@ if __name__=="__main__":
         print("Packages:", state['packages'])
         print("Robots:", state['robots'])
 
-        # For debug purpose
         t += 1
         if t == 100:
             break
